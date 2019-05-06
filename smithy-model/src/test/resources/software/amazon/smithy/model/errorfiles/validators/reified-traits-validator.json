@@ -1,0 +1,57 @@
+{
+  "smithy": "1.0",
+  "smithy.example": {
+    "traitDefs": {
+      "reifiedAnnotation": {
+        "selector": "*",
+        "reified": true
+      },
+      "reifiedString": {
+        "selector": "*",
+        "reified": true,
+        "shape": "String"
+      }
+    },
+    "shapes": {
+      "A": {
+        "type": "structure",
+        "reifiedAnnotation": true,
+        "reifiedString": "hi"
+      },
+      "B": {
+        "type": "structure",
+        "isa": "A"
+      },
+      "C": {
+        "type": "structure",
+        "isa": "B"
+      },
+      "SubA": {
+        "type": "structure",
+        "isa": "A",
+        "reifiedString": "nope"
+      },
+      "ErrorA": {
+        "type": "structure",
+        "error": "client",
+        "members": {
+          "message": {"target":  "String"}
+        }
+      },
+      "ErrorB": {
+        "type": "structure",
+        "isa": "ErrorA"
+      },
+      "ErrorC": {
+        "type": "structure",
+        "isa": "ErrorA",
+        "error": "client"
+      },
+      "ErrorD": {
+        "type": "structure",
+        "isa": "ErrorA",
+        "error": "server"
+      }
+    }
+  }
+}

@@ -142,9 +142,11 @@ final class NeighborVisitor extends ShapeVisitor.Default<List<Relationship>> imp
 
     @Override
     public List<Relationship> structureShape(StructureShape shape) {
-        return shape.getAllMembers().values().stream()
+        List<Relationship> result = shape.getAllMembers().values().stream()
                 .map(member -> new Relationship(shape, RelationshipType.STRUCTURE_MEMBER, member.getId(), member))
                 .collect(Collectors.toList());
+        shape.getParent().ifPresent(id -> result.add(relationship(shape, RelationshipType.ISA, id)));
+        return result;
     }
 
     @Override

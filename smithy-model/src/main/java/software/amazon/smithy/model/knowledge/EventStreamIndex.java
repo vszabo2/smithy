@@ -38,6 +38,8 @@ import software.amazon.smithy.model.traits.StringTrait;
  * operations, including the input/output member that contains an
  * event stream, the shape targeted by this member, and any additional
  * input/output members that form the initial message.
+ *
+ * <p>TODO: Account for structure parents.
  */
 public final class EventStreamIndex implements KnowledgeIndex {
     private static final Logger LOGGER = Logger.getLogger(EventStreamIndex.class.getName());

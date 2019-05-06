@@ -52,6 +52,8 @@ final class LoaderUtils {
     private static final String IDENTIFIERS_KEY = "identifiers";
     private static final String TYPE_KEY = "type";
     private static final String VERSION_KEY = "version";
+    private static final String REIFIED_KEY = "reified";
+    private static final String INHERITED_KEY = "inherited";
     static final Collection<String> RESOURCE_PROPERTY_NAMES = ListUtils.of(
             TYPE_KEY, CREATE_KEY, READ_KEY, UPDATE_KEY, DELETE_KEY, LIST_KEY,
             IDENTIFIERS_KEY, RESOURCES_KEY, OPERATIONS_KEY);
@@ -61,7 +63,7 @@ final class LoaderUtils {
             TraitDefinition.SELECTOR_KEY, TraitDefinition.STRUCTURALLY_EXCLUSIVE_KEY, TraitDefinition.SHAPE_KEY,
             TraitDefinition.TAGS_KEY, TraitDefinition.CONFLICTS_KEY, TraitDefinition.DOCUMENTATION_KEY,
             TraitDefinition.EXTERNAL_DOCUMENTATION_KEY, TraitDefinition.DEPRECATED_KEY,
-            TraitDefinition.DEPRECATION_REASON_KEY);
+            TraitDefinition.DEPRECATION_REASON_KEY, REIFIED_KEY, INHERITED_KEY);
 
     private LoaderUtils() {}
 
@@ -161,6 +163,9 @@ final class LoaderUtils {
         members.getStringMember(TraitDefinition.DEPRECATION_REASON_KEY)
                 .map(StringNode::getValue)
                 .ifPresent(builder::deprecationReason);
+
+        members.getBooleanMember(REIFIED_KEY).map(BooleanNode::getValue).ifPresent(builder::reified);
+        members.getBooleanMember(INHERITED_KEY).map(BooleanNode::getValue).ifPresent(builder::inherited);
 
         visitor.onTraitDef(builder);
     }

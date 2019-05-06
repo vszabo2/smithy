@@ -37,6 +37,8 @@ import software.amazon.smithy.utils.Pair;
 
 /**
  * Index of operation shapes to the identifiers bound to the operation.
+ *
+ * TODO: Account for structure parents.
  */
 public final class IdentifierBindingIndex implements KnowledgeIndex {
     /** Map of Resource shape ID to a map of Operation shape ID to a map of identifier name to the member name. */

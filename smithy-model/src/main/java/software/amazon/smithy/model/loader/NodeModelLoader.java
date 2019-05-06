@@ -72,9 +72,8 @@ class NodeModelLoader implements ModelLoader {
     private static final Set<String> MEMBER_PROPERTIES = SetUtils.of("target");
     private static final List<String> OPERATION_PROPERTY_NAMES = ListUtils.of("type", "input", "output", "errors");
     private static final List<String> SIMPLE_PROPERTY_NAMES = ListUtils.of("type");
-    private static final List<String> STRUCTURE_PROPERTY_NAMES = ListUtils.of("type", "members");
+    private static final List<String> STRUCTURE_PROPERTY_NAMES = ListUtils.of("type", "members", "isa");
     private static final List<String> UNION_PROPERTY_NAMES = ListUtils.of("type", "members");
-    private static final Set<String> RESERVED_STRUCTURE_WORDS = SetUtils.of("isa");
 
     private final NodeFactory nodeFactory;
 
@@ -377,23 +376,17 @@ class NodeModelLoader implements ModelLoader {
                 .orElse(Node.objectNode())
                 .expectObjectNode("Expected structure `members` to be an object; found {type}.");
 
-        // Some properties are reserved for potential use in the future.
-        for (StringNode property : shapeNode.getMembers().keySet()) {
-            if (RESERVED_STRUCTURE_WORDS.contains(property.getValue())) {
-                visitor.onError(ValidationEvent.builder()
-                        .eventId(Validator.MODEL_ERROR)
-                        .severity(Severity.ERROR)
-                        .sourceLocation(property.getSourceLocation())
-                        .message(String.format("`%s` is a reserved word for a structure shape", property.getValue()))
-                        .build());
-            }
-        }
-
         extractTraits(shapeId, shapeNode, STRUCTURE_PROPERTY_NAMES, visitor);
-        visitor.onShape(StructureShape.builder().id(shapeId).source(shapeNode.getSourceLocation()));
-        memberObject.getMembers().forEach((k, v) -> {
-            loadMember(visitor, shapeId.withMember(k.getValue()), v);
-        });
+        StructureShape.Builder builder = StructureShape.builder()
+                .id(shapeId)
+                .source(shapeNode.getSourceLocation());
+        // Set the parent, and resolve forward references.
+        shapeNode.getStringMember("isa")
+                .map(StringNode::getValue)
+                .ifPresent(isa -> visitor.onShapeTarget(shapeId.getNamespace(), isa, builder::isa));
+
+        visitor.onShape(builder);
+        memberObject.getMembers().forEach((k, v) -> loadMember(visitor, shapeId.withMember(k.getValue()), v));
     }
 
     private void loadUnion(ShapeId shapeId, ObjectNode shapeNode, LoaderVisitor visitor) {
@@ -402,8 +395,6 @@ class NodeModelLoader implements ModelLoader {
                 .expectObjectNode("Expected union `members` to be an `object`, got `{type}`.");
         extractTraits(shapeId, shapeNode, UNION_PROPERTY_NAMES, visitor);
         visitor.onShape(UnionShape.builder().id(shapeId).source(shapeNode.getSourceLocation()));
-        membersNode.getMembers().forEach((k, v) -> {
-            loadMember(visitor, shapeId.withMember(k.getValue()), v);
-        });
+        membersNode.getMembers().forEach((k, v) -> loadMember(visitor, shapeId.withMember(k.getValue()), v));
     }
 }

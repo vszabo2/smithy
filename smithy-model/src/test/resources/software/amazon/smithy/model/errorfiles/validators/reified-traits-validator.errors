@@ -1,0 +1,6 @@
+[ERROR] (ReifiedTrait) smithy.example#B / [21, 12]: Structure is missing reified trait `smithy.example#reifiedAnnotation` defined on parent structure, `smithy.example#A`, with value `true`
+[ERROR] (ReifiedTrait) smithy.example#B / [21, 12]: Structure is missing reified trait `smithy.example#reifiedString` defined on parent structure, `smithy.example#A`, with value `"hi"`
+[ERROR] (ReifiedTrait) smithy.example#ErrorB / [41, 17]: Structure is missing reified trait `smithy.api#error` defined on parent structure, `smithy.example#ErrorA`, with value `"client"`
+[ERROR] (ReifiedTrait) smithy.example#ErrorD / [50, 17]: Structure has a different reified trait value for `smithy.api#error` than its parent structure, `smithy.example#ErrorA`: `"server"` vs `"client"`
+[ERROR] (ReifiedTrait) smithy.example#SubA / [29, 15]: Structure has a different reified trait value for `smithy.example#reifiedString` than its parent structure, `smithy.example#A`: `"nope"` vs `"hi"`
+[ERROR] (ReifiedTrait) smithy.example#SubA / [29, 15]: Structure is missing reified trait `smithy.example#reifiedAnnotation` defined on parent structure, `smithy.example#A`, with value `true`

@@ -75,6 +75,7 @@ import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.SetShape;
 import software.amazon.smithy.model.shapes.ShapeId;
 import software.amazon.smithy.model.shapes.ShapeIdSyntaxException;
+import software.amazon.smithy.model.shapes.ShapeType;
 import software.amazon.smithy.model.shapes.ShortShape;
 import software.amazon.smithy.model.shapes.StringShape;
 import software.amazon.smithy.model.shapes.StructureShape;
@@ -101,8 +102,8 @@ final class SmithyModelLoader implements ModelLoader {
         STATEMENTS.put("service", SmithyModelLoader::parseService);
         STATEMENTS.put("operation", SmithyModelLoader::parseOperation);
         STATEMENTS.put("resource", SmithyModelLoader::parseResource);
-        STATEMENTS.put("structure", state -> parseStructuredShape(state, "structure", StructureShape.builder()));
-        STATEMENTS.put("union", state -> parseStructuredShape(state, "union", UnionShape.builder()));
+        STATEMENTS.put("structure", state -> parseStructure(state, StructureShape.builder()));
+        STATEMENTS.put("union", state -> parseUnion(state, UnionShape.builder()));
         STATEMENTS.put("list", state -> parseCollection(state, "list", ListShape.builder()));
         STATEMENTS.put("set", state -> parseCollection(state, "set", SetShape.builder()));
         STATEMENTS.put("map", SmithyModelLoader::parseMap);
@@ -367,14 +368,18 @@ final class SmithyModelLoader implements ModelLoader {
      * @return Returns the parsed shape ID.
      */
     private static ShapeId parseShapeName(State state) {
+        ShapeId id = parseShapeId(state);
+        state.pendingTraits.forEach(pair -> state.visitor.onTrait(
+                id, state.namespace, pair.getLeft(), pair.getRight()));
+        state.pendingTraits.clear();
+        return id;
+    }
+
+    private static ShapeId parseShapeId(State state) {
         requireNamespaceOrThrow(state);
         String name = state.expect(UNQUOTED).lexeme;
         try {
-            ShapeId id = ShapeId.fromOptionalNamespace(state.namespace, name);
-            state.pendingTraits.forEach(pair -> state.visitor.onTrait(
-                    id, state.namespace, pair.getLeft(), pair.getRight()));
-            state.pendingTraits.clear();
-            return id;
+            return ShapeId.fromOptionalNamespace(state.namespace, name);
         } catch (ShapeIdSyntaxException e) {
             throw state.syntax(e.getMessage());
         }
@@ -456,10 +461,27 @@ final class SmithyModelLoader implements ModelLoader {
         state.expectNewline();
     }
 
-    private static void parseStructuredShape(State state, String shapeType, AbstractShapeBuilder builder) {
+    private static void parseStructure(State state, StructureShape.Builder builder) {
         builder.source(currentSourceLocation(state));
         ShapeId id = parseShapeName(state);
-        parseStructuredBody(shapeType, state, id);
+
+        // Parse "isa" if present.
+        if (state.peek().filter(token -> token.type == UNQUOTED).isPresent()) {
+            if (!state.next().lexeme.equals("isa")) {
+                throw state.syntax("Expected either `isa` or `{`");
+            }
+            String nextId = state.expect(UNQUOTED).lexeme;
+            state.visitor.onShapeTarget(state.namespace, nextId, builder::isa);
+        }
+
+        parseStructuredBody(ShapeType.STRUCTURE.toString(), state, id);
+        state.visitor.onShape(builder.id(id));
+    }
+
+    private static void parseUnion(State state, UnionShape.Builder builder) {
+        builder.source(currentSourceLocation(state));
+        ShapeId id = parseShapeName(state);
+        parseStructuredBody(ShapeType.UNION.toString(), state, id);
         state.visitor.onShape(builder.id(id));
     }
 

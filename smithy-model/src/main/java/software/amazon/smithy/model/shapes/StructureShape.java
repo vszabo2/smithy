@@ -31,10 +31,12 @@ import software.amazon.smithy.utils.ToSmithyBuilder;
 public final class StructureShape extends Shape implements ToSmithyBuilder<StructureShape> {
 
     private final Map<String, MemberShape> members;
+    private final ShapeId isa;
 
     private StructureShape(Builder builder) {
         super(builder, ShapeType.STRUCTURE, false);
         assert builder.members != null;
+        isa = builder.isa;
 
         // Copy the members to make them immutable and ensure that each
         // member has a valid ID that is prefixed with the structure ID.
@@ -58,7 +60,7 @@ public final class StructureShape extends Shape implements ToSmithyBuilder<Struc
 
     @Override
     public Builder toBuilder() {
-        return builder().from(this).members(getAllMembers().values());
+        return builder().from(this).members(getAllMembers().values()).isa(isa);
     }
 
     @Override
@@ -99,9 +101,20 @@ public final class StructureShape extends Shape implements ToSmithyBuilder<Struc
         return Optional.ofNullable(members.get(name));
     }
 
+    public Optional<ShapeId> getParent() {
+        return Optional.ofNullable(isa);
+    }
+
     @Override
     public boolean equals(Object other) {
-        return super.equals(other) && members.equals(((StructureShape) other).members);
+        if (!super.equals(other)) {
+            return false;
+        } else if (other == this) {
+            return true;
+        }
+
+        StructureShape o = (StructureShape) other;
+        return members.equals(o.members) && Objects.equals(isa, o.isa);
     }
 
     /**
@@ -110,6 +123,7 @@ public final class StructureShape extends Shape implements ToSmithyBuilder<Struc
     public static final class Builder extends AbstractShapeBuilder<Builder, StructureShape> {
 
         private Map<String, MemberShape> members = new LinkedHashMap<>();
+        private ShapeId isa;
 
         @Override
         public StructureShape build() {
@@ -159,6 +173,32 @@ public final class StructureShape extends Shape implements ToSmithyBuilder<Struc
         public Builder removeMember(String member) {
             members.remove(member);
             return this;
+        }
+
+        /**
+         * Sets the parent of the structure.
+         *
+         * @param isa Shape ID of the parent.
+         * @return Returns the builder.
+         */
+        public Builder isa(ToShapeId isa) {
+            this.isa = isa == null ? null : isa.toShapeId();
+            return this;
+        }
+
+        /**
+         * Sets the parent of the structure.
+         *
+         * @param isaShapeId Absolute parent shape ID as a string.
+         * @return Returns the builder.
+         */
+        public Builder isa(String isaShapeId) {
+            if (isaShapeId == null) {
+                isa = null;
+                return this;
+            }
+
+            return isa(ShapeId.from(isaShapeId));
         }
     }
 }

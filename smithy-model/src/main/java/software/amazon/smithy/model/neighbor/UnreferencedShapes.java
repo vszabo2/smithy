@@ -15,6 +15,8 @@
 
 package software.amazon.smithy.model.neighbor;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +24,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.knowledge.NeighborProviderIndex;
+import software.amazon.smithy.model.knowledge.StructureIndex;
 import software.amazon.smithy.model.loader.Prelude;
 import software.amazon.smithy.model.shapes.ServiceShape;
 import software.amazon.smithy.model.shapes.Shape;
@@ -53,14 +56,37 @@ public final class UnreferencedShapes {
         Set<Shape> connected = model.getShapeIndex().shapes(ServiceShape.class)
                 .flatMap(service -> shapeWalker.walkShapes(service).stream())
                 .collect(Collectors.toSet());
-        Predicate<Shape> matchesFilters = createPredicate(model, shapeWalker);
+        // Include shapes that are children of connected shapes.
+        addConnectedSubtypes(model, connected);
         // Any shape that wasn't identified as connected to a service is considered unreferenced.
+        Predicate<Shape> matchesFilters = createPredicate(model, shapeWalker);
         return model.getShapeIndex().shapes()
                 .filter(FunctionalUtils.not(Shape::isMemberShape))
                 .filter(FunctionalUtils.not(connected::contains))
                 .filter(matchesFilters)
                 .filter(keepFilter)
                 .collect(Collectors.toSet());
+    }
+
+    // Account for subtypes of types that are connected to the graph.
+    private void addConnectedSubtypes(Model model, Set<Shape> connected) {
+        StructureIndex structureIndex = model.getKnowledge(StructureIndex.class);
+        Deque<Shape> candidates = new ArrayDeque<>();
+        for (Shape shape : connected) {
+            if (shape.isStructureShape()) {
+                candidates.add(shape);
+            }
+        }
+
+        while (!candidates.isEmpty()) {
+            Shape candidate = candidates.removeFirst();
+            for (Shape subtype : structureIndex.getSubtypes(candidate)) {
+                if (!connected.contains(subtype)) {
+                    candidates.add(subtype);
+                    connected.add(subtype);
+                }
+            }
+        }
     }
 
     private Predicate<Shape> createPredicate(Model model, Walker walker) {

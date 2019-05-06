@@ -47,6 +47,8 @@ public final class TraitDefinition implements ToNode, FromSourceLocation, Tagged
     public static final String EXTERNAL_DOCUMENTATION_KEY = "externalDocumentation";
     public static final String DEPRECATED_KEY = "deprecated";
     public static final String DEPRECATION_REASON_KEY = "deprecationReason";
+    public static final String INHERITED_KEY = "inherited";
+    public static final String REIFIED_KEY = "reified";
 
     private final String traitName;
     private final String traitNamespace;
@@ -60,6 +62,8 @@ public final class TraitDefinition implements ToNode, FromSourceLocation, Tagged
     private final boolean structurallyExclusive;
     private final boolean deprecated;
     private final String deprecationReason;
+    private final boolean reified;
+    private final boolean inherited;
 
     public TraitDefinition(TraitDefinition.Builder builder) {
         SmithyBuilder.requiredState("traitName", builder.traitName);
@@ -75,6 +79,8 @@ public final class TraitDefinition implements ToNode, FromSourceLocation, Tagged
         externalDocumentation = builder.externalDocumentation;
         deprecated = builder.deprecated;
         deprecationReason = builder.deprecationReason;
+        reified = builder.reified;
+        inherited = builder.inherited;
 
         if (deprecationReason != null && !deprecated) {
             throw new SourceException("deprecationReason cannot be set if deprecated is not set", getSourceLocation());
@@ -200,6 +206,14 @@ public final class TraitDefinition implements ToNode, FromSourceLocation, Tagged
         return Optional.ofNullable(externalDocumentation);
     }
 
+    public boolean isReified() {
+        return reified;
+    }
+
+    public boolean isInherited() {
+        return inherited;
+    }
+
     @Override
     public List<String> getTags() {
         return tags;
@@ -220,6 +234,14 @@ public final class TraitDefinition implements ToNode, FromSourceLocation, Tagged
 
         if (shape != null) {
             builder.withMember(SHAPE_KEY, shape.toString());
+        }
+
+        if (inherited) {
+            builder.withMember(INHERITED_KEY, true);
+        }
+
+        if (reified) {
+            builder.withMember(REIFIED_KEY, true);
         }
 
         if (!conflicts.isEmpty()) {
@@ -268,7 +290,9 @@ public final class TraitDefinition implements ToNode, FromSourceLocation, Tagged
                    && conflicts.equals(that.conflicts)
                    && Objects.equals(deprecationReason, that.deprecationReason)
                    && Objects.equals(documentation, that.documentation)
-                   && Objects.equals(externalDocumentation, that.externalDocumentation);
+                   && Objects.equals(externalDocumentation, that.externalDocumentation)
+                   && reified == that.reified
+                   && inherited == that.inherited;
         }
     }
 
@@ -292,6 +316,8 @@ public final class TraitDefinition implements ToNode, FromSourceLocation, Tagged
         private boolean structurallyExclusive;
         private boolean deprecated;
         private String deprecationReason;
+        private boolean reified;
+        private boolean inherited;
 
         private Builder() {}
 
@@ -373,6 +399,16 @@ public final class TraitDefinition implements ToNode, FromSourceLocation, Tagged
 
         public Builder deprecationReason(String deprecationReason) {
             this.deprecationReason = deprecationReason;
+            return this;
+        }
+
+        public Builder reified(boolean reified) {
+            this.reified = reified;
+            return this;
+        }
+
+        public Builder inherited(boolean inherited) {
+            this.inherited = inherited;
             return this;
         }
 

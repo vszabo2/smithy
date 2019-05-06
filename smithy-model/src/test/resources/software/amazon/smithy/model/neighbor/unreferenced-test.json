@@ -35,6 +35,10 @@
                     }
                 }
             },
+            "Child": {
+                "type": "structure",
+                "isa": "MyOperationInput"
+            },
             "Exclude1": {
                 "type": "string",
                 "ns.foo#quux": {

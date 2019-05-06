@@ -165,5 +165,12 @@ public enum RelationshipType {
      * shapes. They reference the {@link MemberShape member} shapes that define
      * the members of the union.
      */
-    UNION_MEMBER;
+    UNION_MEMBER,
+
+    /**
+     * {@code ISA} relationships exist on {@link StructureShape} shapes
+     * that have an {@code isa} property. It connects the child shape to its
+     * parent type.
+     */
+    ISA
 }

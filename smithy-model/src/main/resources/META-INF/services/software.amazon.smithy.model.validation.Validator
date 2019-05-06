@@ -19,6 +19,7 @@ software.amazon.smithy.model.validation.validators.PaginatedTraitValidator
 software.amazon.smithy.model.validation.validators.PrivateAccessValidator
 software.amazon.smithy.model.validation.validators.RangeTraitValidator
 software.amazon.smithy.model.validation.validators.ReferencesTraitValidator
+software.amazon.smithy.model.validation.validators.ReifiedTraitValidator
 software.amazon.smithy.model.validation.validators.ResourceCycleValidator
 software.amazon.smithy.model.validation.validators.ResourceIdentifierBindingValidator
 software.amazon.smithy.model.validation.validators.ResourceIdentifierValidator
@@ -28,9 +29,11 @@ software.amazon.smithy.model.validation.validators.SetTargetValidator
 software.amazon.smithy.model.validation.validators.ShapeIdConflictValidator
 software.amazon.smithy.model.validation.validators.SingleOperationBindingValidator
 software.amazon.smithy.model.validation.validators.SingleResourceBindingValidator
+software.amazon.smithy.model.validation.validators.StructureParentValidator
 software.amazon.smithy.model.validation.validators.TargetValidator
 software.amazon.smithy.model.validation.validators.TraitConflictValidator
 software.amazon.smithy.model.validation.validators.TraitDefinitionShapeValidator
+software.amazon.smithy.model.validation.validators.TraitDefinitionValidator
 software.amazon.smithy.model.validation.validators.TraitTargetValidator
 software.amazon.smithy.model.validation.validators.TraitValueValidator
 software.amazon.smithy.model.validation.validators.XmlNamespaceTraitValidator

@@ -35,7 +35,7 @@ final class Parser {
     private static final Set<Character> BREAK_TOKENS = SetUtils.of(',', ']', ')');
     private static final List<String> REL_TYPES = ListUtils.of(
             "identifier", "create", "read", "update", "delete", "list", "member", "input", "output", "error",
-            "operation", "resource", "bound");
+            "operation", "resource", "bound", "isa");
     private static final List<String> FUNCTIONS = ListUtils.of("test", "each", "of", "not");
     private static final List<String> ATTRIBUTES = ListUtils.of(
             "trait|", "id|namespace", "id|name", "id|member", "id", "service|version");

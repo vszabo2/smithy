@@ -41,11 +41,18 @@
         "selector": "structure",
         "shape": "ErrorKind",
         "documentation": "Indicates that a structure shape represents an error. All shapes referenced by the errors list of an operation MUST be targeted with this trait.",
-        "tags": ["diff.error.const"]
+        "tags": ["diff.error.const"],
+        "reified": true
+      },
+      "final": {
+        "selector": "structure",
+        "documentation": "Indicates that a structure cannot have any subtypes.",
+        "tags": ["diff.error.add"]
       },
       "retryable": {
         "selector": "structure[trait|error]",
-        "documentation": "Indicates that an error MAY be retried by the client."
+        "documentation": "Indicates that an error MAY be retried by the client.",
+        "inherited": true
       },
       "readonly": {
         "selector": "operation",
@@ -112,7 +119,8 @@
       },
       "private": {
         "selector": "*",
-        "documentation": "Prevents models defined in a different namespace from referencing the targeted shape."
+        "documentation": "Prevents models defined in a different namespace from referencing the targeted shape.",
+        "reified": true
       },
       "sensitive": {
         "selector": ":test(blob, string, member > :each(blob, string))",
@@ -223,7 +231,8 @@
       "httpError": {
         "selector": "structure[trait|error]",
         "shape": "PrimitiveInteger",
-        "documentation": "Defines an HTTP response code for an operation error."
+        "documentation": "Defines an HTTP response code for an operation error.",
+        "inherited": true
       },
       "cors": {
         "selector": "service",

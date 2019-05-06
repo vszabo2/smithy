@@ -1,0 +1,97 @@
+{
+  "smithy": "1.0",
+  "smithy.example": {
+    "shapes": {
+      "A": {
+        "type": "structure",
+        "members": {
+          "a": {"target": "String"}
+        }
+      },
+      "B": {
+        "type": "structure",
+        "isa": "A",
+        "members": {
+          "b": {"target": "String"}
+        }
+      },
+      "C": {
+        "type": "structure",
+        "isa": "F",
+        "members": {
+          "c": {"target": "String"}
+        }
+      },
+      "D": {
+        "type": "structure",
+        "isa": "C",
+        "members": {
+          "d": {"target": "String"}
+        }
+      },
+      "E": {
+        "type": "structure",
+        "isa": "D",
+        "members": {
+          "e": {"target": "String"}
+        }
+      },
+      "F": {
+        "type": "structure",
+        "isa": "E",
+        "members": {
+          "f": {"target": "String"}
+        }
+      },
+      "G": {
+        "type": "structure",
+        "isa": "DoesNotExist",
+        "members": {
+          "g": {"target": "String"}
+        }
+      },
+      "H": {
+        "type": "structure",
+        "isa": "String",
+        "members": {
+          "h": {"target": "String"}
+        }
+      },
+      "FinalStructure": {
+        "type": "structure",
+        "final": true
+      },
+      "InvalidExtends": {
+        "type": "structure",
+        "isa": "FinalStructure"
+      },
+      "Foo": {
+        "type": "structure",
+        "members": {
+          "a": { "target": "String" },
+          "b": { "target": "String" },
+          "c": { "target": "String" }
+        }
+      },
+      "Baz": {
+        "type": "structure",
+        "isa": "Foo",
+        "members": {
+          "a": { "target": "String" },
+          "B": { "target": "String" },
+          "Baz": { "target": "String" }
+        }
+      },
+      "Bar": {
+        "type": "structure",
+        "isa": "Baz",
+        "members": {
+          "A": { "target": "String" },
+          "b": { "target": "String" },
+          "c": { "target": "String" },
+          "baz": { "target": "String" }
+        }
+      }
+    }
+  }
+}

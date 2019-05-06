@@ -53,6 +53,16 @@
             },
             "String": {
                 "type": "string"
+            },
+            "Extended": {
+                "type": "structure",
+                "isa": "Invalid3",
+                "members": {
+                    "qux": {
+                        "target": "String",
+                        "httpPayload": true
+                    }
+                }
             }
         }
     }

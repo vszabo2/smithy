@@ -48,6 +48,10 @@ import software.amazon.smithy.utils.OptionalUtils;
  * be found in the input or output of the operation. Additional
  * validation is performed in the {@link PaginatedTraitValidator}
  * (which makes use of this index).
+ *
+ * <p>Pagination members do not check for members defined on the parent
+ * structures of input or output shapes. Pagination member names are
+ * local to the direct input or output shape of an operation.
  */
 public final class PaginatedIndex implements KnowledgeIndex {
     private final Map<ShapeId, PaginationInfo> idToTraits;

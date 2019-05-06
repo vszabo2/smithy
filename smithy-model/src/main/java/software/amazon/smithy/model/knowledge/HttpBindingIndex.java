@@ -51,6 +51,8 @@ import software.amazon.smithy.utils.ListUtils;
  * shapes, diff models to ensure backward compatibility at the wire level, etc.
  *
  * <p>This index does not perform validation of the underlying model.
+ *
+ * TODO: Account for structure parents?
  */
 public final class HttpBindingIndex implements KnowledgeIndex {
     private final ShapeIndex index;

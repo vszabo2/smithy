@@ -20,11 +20,14 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import software.amazon.smithy.model.Model;
 import software.amazon.smithy.model.SourceLocation;
+import software.amazon.smithy.model.knowledge.StructureIndex;
 import software.amazon.smithy.model.shapes.MemberShape;
 import software.amazon.smithy.model.shapes.ResourceShape;
+import software.amazon.smithy.model.shapes.Shape;
 import software.amazon.smithy.model.shapes.ShapeId;
 
 public class SmithyModelLoaderTest {
@@ -84,5 +87,20 @@ public class SmithyModelLoaderTest {
         assertTrue(model.getTraitDefinition("example.namespace#numeric").isPresent());
         assertThat(model.getTraitDefinition("example.namespace#numeric").get().getShape().get(),
                    equalTo(ShapeId.from("smithy.api#Integer")));
+    }
+
+    @Test
+    public void detectsValidIsa() {
+        Model model = Model.assembler()
+                .addImport(getClass().getResource("valid/isa.smithy"))
+                .assemble()
+                .unwrap();
+        StructureIndex structureIndex = model.getKnowledge(StructureIndex.class);
+
+        assertThat(structureIndex.getParent(ShapeId.from("smithy.example#Foo")), equalTo(Optional.empty()));
+        assertThat(structureIndex.getParent(ShapeId.from("smithy.example#Baz")).map(Shape::getId),
+                   equalTo(Optional.of(ShapeId.from("smithy.example#Foo"))));
+        assertThat(structureIndex.getParent(ShapeId.from("smithy.example#Qux")).map(Shape::getId),
+                   equalTo(Optional.of(ShapeId.from("smithy.example#Baz"))));
     }
 }

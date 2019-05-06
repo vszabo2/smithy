@@ -1,0 +1,20 @@
+{
+  "smithy": "1.0",
+  "ns.foo": {
+    "traitDefs": {
+      "invalid": {
+        "selector": "*",
+        "reified": true,
+        "inherited": true
+      },
+      "valid1": {
+        "selector": "*",
+        "reified": true
+      },
+      "valid2": {
+        "selector": "*",
+        "inherited": true
+      }
+    }
+  }
+}

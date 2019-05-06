@@ -1,0 +1,1 @@
+[ERROR] (TraitDefinition) - / [5, 18]: Trait definition `ns.foo#invalid` is marked as both inherited and reified

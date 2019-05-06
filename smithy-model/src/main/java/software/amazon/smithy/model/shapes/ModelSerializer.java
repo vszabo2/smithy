@@ -289,7 +289,11 @@ public final class ModelSerializer {
 
         @Override
         public Node structureShape(StructureShape shape) {
-            return createStructureAndUnion(shape, shape.getAllMembers());
+            ObjectNode result = createStructureAndUnion(shape, shape.getAllMembers());
+            if (shape.getParent().isPresent()) {
+                result = result.withMember("parent", shape.getParent().get().toString());
+            }
+            return result;
         }
 
         @Override
