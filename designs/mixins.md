@@ -114,13 +114,6 @@ structure CityResourceInput {
 }
 ```
 
-The `mixin` trait is defined in the Smithy prelude as:
-
-```
-@trait(selector: ":is(structure, union)")
-structure mixin {}
-```
-
 The `with` clause of a structure or union statement is used to merge the members
 of one or more mixins into a structure or union. Each shape ID in the `with`
 clause MUST target a shape marked with the `@mixin` trait. Structure shapes can
@@ -161,7 +154,7 @@ defined directly in a shape, and it allows members of a shape to be backward
 compatibly refactored and moved into a mixin or for a shape to remove a mixin
 and replace it with members defined directly in the shape.
 
-The above `C` structure is equivalent to:
+The above `C` structure is equivalent to the following flattened structure:
 
 ```
 structure C {
@@ -214,7 +207,7 @@ structure UserInfo {
 structure UserSummary with UserInfo {}
 ```
 
-Is equivalent to the following structure:
+Is equivalent to the following flattened structure:
 
 ```
 /// Generic mixin documentation.
@@ -242,7 +235,7 @@ structure UserInfo {
 structure UserSummary with UserInfo {}
 ```
 
-Is equivalent to the following structure:
+Is equivalent to the following flattened structure:
 
 ```
 /// More specific documentation.
@@ -280,7 +273,7 @@ structure Three with One, Two {}
 structure FourStruct with Three {}
 ```
 
-Is equivalent to the following structure:
+Is equivalent to the following flattened structure:
 
 ```
 /// Four
@@ -291,6 +284,46 @@ Is equivalent to the following structure:
 @foo(3)
 structure FourStruct with Three {}
 ```
+
+#### Mixin local traits
+
+Sometimes it's useful to apply traits to a mixin that are not copied onto
+shapes that use the mixin. For example, if a mixin is an implementation detail
+of a model, then it is recommended to apply the `@private` trait to the mixin
+so that shapes outside of the namespace the mixin is defined within cannot
+refer to the mixin. However, every shape that uses the mixin doesn't
+necessarily need to be marked as `@private`. The `localTraits` property of
+the `@mixin` trait can be used to ensure that a list of traits applied to
+the mixin are not copied onto shapes that use the mixin (note that this has
+no effect on the traits applied to members contained within a mixin).
+
+Consider the following model:
+
+```
+namespace smithy.example
+
+@private
+@mixin(localTraits: [private])
+structure PrivateMixin {
+    foo: String
+}
+
+structure PublicShape with PrivateMixin {}
+```
+
+The `PrivateMixin` shape can only be referenced from the `smithy.example`
+namespace. Because `private` is present in the `localTraits` property of the
+`@mixin` trait, `PublicShape` is not marked with the `@private` trait and
+can be referred to outside of `smithy.example`. `PublicShape` is equivalent
+to the following flattened structure:
+
+```
+structure PublicShape {
+    foo: String
+}
+```
+
+> See *Trait definitions* for a full description of `localTraits`.
 
 
 ### Overriding traits on mixin members
@@ -342,7 +375,7 @@ structure ABC with A, B {
 }
 ```
 
-Is equivalent to the following structure:
+Is equivalent to the following flattened structure:
 
 ```
 structure ABC {
@@ -358,13 +391,6 @@ structure ABC {
     /// C docs
     c: String
 }
-```
-
-The `@override` trait is defined in the Smithy prelude as:
-
-```
-@trait(selector: "is(structure, union) > member")
-structure override {}
 ```
 
 
@@ -706,6 +732,55 @@ The members are ordered as follows:
 - `sizeFilter`
 
 
+### Trait definitions
+
+#### `@mixin` trait
+
+The `@mixin` trait is a structured trait defined in the Smithy prelude as:
+
+```
+@trait(selector: ":is(structure, union)")
+structure mixin {
+    localTraits: LocalMixinTraitList
+}
+
+@private
+list LocalMixinTraitList {
+    member: LocalMixinTrait
+}
+
+@idRef(
+    selector: "[trait|trait]",
+    failWhenMissing: true,
+    errorMessage: """
+            Strings provided to the localTraits property of a mixin trait
+            must target a valid trait.""")
+@private
+string LocalMixinTrait
+```
+
+The `@mixin` trait has a single optional member named `localTraits` that
+contains a list of shape IDs. Each shape ID MUST reference a valid trait that
+is applied directly to the mixin. The traits referenced in `localTraits` are
+not copied onto shapes that use the mixin. `localTraits` only affects traits
+applied to the mixin container shape and has no impact on the members
+contained within a mixin.
+
+> Note: `smithy.api#mixin` is considered implicitly present in the
+> `localTraits` property and does not  need to be defined in the list of
+> local traits.
+
+
+#### `@override` trait
+
+The `@override` trait is an annotation trait defined in the Smithy prelude as:
+
+```
+@trait(selector: "is(structure, union) > member")
+structure override {}
+```
+
+
 ### Reference implementation notes
 
 Mixins will be implemented in Smithy's Java reference implementation in a way
@@ -714,6 +789,15 @@ For example, when calling `Shape#getAllMembers`, both mixin members and
 members local to the shape are returned. This reduces the complexity of code
 generators and will prevent issues with code generators forgetting to
 traverse mixins to resolve members.
+
+The reference implementation will also contain a model transformation that can
+"flatten" mixins out of a model so that they do not need to be accounted for
+in code generators and other tooling that performs exogenous model
+transformations.
+
+Smithy's diff implementation should be updated to understand the impact of
+mixins on backward compatibility, especially mixins that are marked with the
+`@private` trait.
 
 
 ### Converting to OpenAPI, JSON Schema, and other models
