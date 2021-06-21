@@ -767,7 +767,7 @@ applied to the mixin container shape and has no impact on the members
 contained within a mixin.
 
 > Note: `smithy.api#mixin` is considered implicitly present in the
-> `localTraits` property and does not  need to be defined in the list of
+> `localTraits` property and does not need to be defined in the list of
 > local traits.
 
 
