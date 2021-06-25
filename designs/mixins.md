@@ -282,7 +282,7 @@ Is equivalent to the following flattened structure:
 @threeTrait
 @fourTrait
 @foo(3)
-structure FourStruct with Three {}
+structure FourStruct {}
 ```
 
 #### Mixin local traits
